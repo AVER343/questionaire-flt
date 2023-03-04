@@ -1,0 +1,152 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Status {
+  id     Int    @id @default(autoincrement())
+  status String @unique
+}
+
+model Users {
+  id                  Int                   @id @default(autoincrement())
+  username            String                @unique @db.VarChar(64)
+  password            String
+  created_time        DateTime              @default(now())
+  modified_time       DateTime              @default(now())
+  status              Int                   @default(1)
+  User_email          UserEmail?
+  user_otp            UserOtp[]
+  User_phone          UserPhone?
+  userrole            UserRole[]
+  special_permissions special_permissions[]
+}
+
+model UserEmail {
+  user_id       Int      @unique
+  email         String   @unique
+  created_time  DateTime @default(now())
+  status        Int      @default(1)
+  modified_time DateTime @default(now())
+  user          Users    @relation(fields: [user_id], references: [id])
+
+  @@index([user_id], name: "UserEmail_user_id_idx")
+}
+
+model UserPhone {
+  user_id       Int      @unique
+  phone_number  Int      @unique
+  status        Int      @default(1)
+  created_time  DateTime @default(now())
+  modified_time DateTime @default(now())
+  user          Users    @relation(fields: [user_id], references: [id])
+
+  @@index([user_id], name: "UserPhone_user_id_idx")
+}
+
+model ApiNames {
+  id                  Int                   @id @default(autoincrement())
+  api_name            String                @unique @db.VarChar(50)
+  ApiRolePermissions  ApiRolePermissions[]
+  special_permissions special_permissions[]
+}
+
+model JobStatusTable {
+  id            BigInt    @id @default(autoincrement())
+  queue_type    String    @db.VarChar(50)
+  data          Json?     @default("{}")
+  user_id       BigInt?
+  created_time  DateTime? @default(now()) @db.Timestamp(6)
+  modified_time DateTime? @default(now()) @db.Timestamp(6)
+  completed     Boolean?  @default(false)
+  completed_on  DateTime? @db.Timestamp(6)
+}
+
+model QueueActive {
+  id         Int    @id @default(autoincrement())
+  queue_type QUEUES
+  data       Json?  @default("{}")
+  user_id    Int?
+}
+
+model QueueTypes {
+  id         Int    @id @default(autoincrement())
+  queue_type String @unique @db.VarChar(50)
+  priority   Int?   @default(3) @db.SmallInt
+}
+
+model UserOtp {
+  id            Int       @id @default(autoincrement())
+  otp           String?   @db.VarChar(6)
+  email         String    @db.VarChar(128)
+  generated_on  DateTime? @default(now()) @db.Timestamp(6)
+  otp_tried_for Int?      @default(0) @db.SmallInt
+  otp_active    Boolean?  @default(true)
+  user_id       Int
+  Users         Users     @relation(fields: [user_id], references: [id])
+}
+
+model UserRoleType {
+  id                 Int                  @id @default(autoincrement()) @db.SmallInt
+  user_role          String?              @unique @db.VarChar(64)
+  ApiRolePermissions ApiRolePermissions[]
+  userrole           UserRole[]
+}
+
+model UserRole {
+  id                 Int                  @id @default(autoincrement())
+  user_role          Int                  @db.SmallInt
+  user_id            Int
+  Users              Users                @relation(fields: [user_id], references: [id])
+  user_role_type     UserRoleType         @relation(fields: [user_role], references: [id])
+  ApiRolePermissions ApiRolePermissions[]
+
+  @@unique([user_role, user_id], name: "UserRole_user_role_user_id_key")
+  @@index([user_id], name: "UserRole.user_id_index")
+}
+
+model UserStatelessAuthentication {
+  id                         Int                         @id @default(autoincrement())
+  user_id                    Int?
+  data                       Json                        @default("{}")
+  created_time               DateTime?                   @default(now()) @db.Timestamp(6)
+  tries                      Int?                        @default(0) @db.SmallInt
+  sent_to                    String                      @db.VarChar(128)
+  isActive                   Boolean?                    @default(true)
+  auth_type                  Int?                        @db.SmallInt
+  StatelessAuthenicatonTypes StatelessAuthenicatonTypes? @relation(fields: [auth_type], references: [id])
+}
+
+model StatelessAuthenicatonTypes {
+  id                          Int                           @id @db.SmallInt
+  StatelessAuthenicatonType   String                        @db.VarChar(64)
+  description                 Json?
+  UserStatelessAuthentication UserStatelessAuthentication[]
+}
+
+model ApiRolePermissions {
+  id             Int           @id @default(autoincrement())
+  api_id         Int
+  role_type_id   Int           @db.Integer
+  ApiNames       ApiNames      @relation(fields: [api_id], references: [id])
+  UserRole       UserRole      @relation(fields: [role_type_id], references: [id])
+  UserRoleType   UserRoleType? @relation(fields: [userRoleTypeId], references: [id])
+  userRoleTypeId Int?          @db.SmallInt
+}
+
+model special_permissions {
+  id       Int      @id @default(autoincrement())
+  api_id   Int
+  user_id  Int
+  ApiNames ApiNames @relation(fields: [api_id], references: [id])
+  Users    Users    @relation(fields: [user_id], references: [id])
+}
+
+enum QUEUES {
+  SEND_EMAIL
+}
