@@ -22,6 +22,7 @@ const nestjs_sendgrid_1 = require("@ntegral/nestjs-sendgrid");
 const email_module_1 = require("./communication/email/email.module");
 const config_2 = require("@nestjs/config");
 const jwt_1 = require("@nestjs/jwt");
+const questionaire_module_1 = require("./questionaire/questionaire.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -50,6 +51,7 @@ AppModule = __decorate([
             nestjs_sendgrid_1.SendGridModule.forRoot({
                 apiKey: process.env.SENDGRID_SECRET,
             }),
+            questionaire_module_1.QuestionaireModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

@@ -14,6 +14,7 @@ import { EmailModule } from './communication/email/email.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { CurrentUserMiddleware } from './common/middleware/current-user.middleware';
+import { QuestionaireModule } from './questionaire/questionaire.module';
 @Module({
   imports: [
     BuyerModule,
@@ -40,6 +41,8 @@ import { CurrentUserMiddleware } from './common/middleware/current-user.middlewa
     SendGridModule.forRoot({
       apiKey: process.env.SENDGRID_SECRET,
     }),
+
+    QuestionaireModule,
   ],
   controllers: [AppController],
   providers: [AppService],
