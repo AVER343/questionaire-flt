@@ -15,7 +15,7 @@ let QuestionaireModule = class QuestionaireModule {
 QuestionaireModule = __decorate([
     (0, common_1.Module)({
         controllers: [questionaire_controller_1.QuestionaireController],
-        providers: [questionaire_service_1.QuestionaireService]
+        providers: [questionaire_service_1.QuestionaireService],
     })
 ], QuestionaireModule);
 exports.QuestionaireModule = QuestionaireModule;
